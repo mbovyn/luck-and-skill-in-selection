@@ -1,53 +1,50 @@
 using Statistics
 using Plots
 
-napplicants=18000
-nwinners=11
-
-selskill=[]
-selluck=[]
+#napplicants=18000
+#nwinners=11
 
 ## simulate
 
-for n=1:1000
-    skill=rand(napplicants)
-    luck=rand(napplicants)
+function findluck(napplicants,nwinners,f_luck)
 
-    score=.95*skill+.05*luck
+    selskill=[]
+    selluck=[]
 
-    scoresrt=sortperm(score)
+    for n=1:1000
 
-    append!(selskill,skill[scoresrt[end-nwinners+1:end]])
-    append!(selluck,luck[scoresrt[end-nwinners+1:end]])
+        skill=rand(napplicants)
+        luck=rand(napplicants)
+
+        score=(1-f_luck)*skill+f_luck*luck
+
+        scoresrt=sortperm(score)
+
+        append!(selskill,skill[scoresrt[end-nwinners+1:end]])
+        append!(selluck,luck[scoresrt[end-nwinners+1:end]])
+
+    end
+
+    p=plot(sort(selskill),(1:length(selskill))/length(selskill),linetype=:steppre,label="skill",legend=:topleft)
+    plot!(p,sort(selluck),(1:length(selluck))/length(selluck),linetype=:steppre,label="luck")
+    xaxis!(p,(0,1))
+    xlabel!(p,"Value")
+    ylabel!(p,"CDF")
+    title!(p,string(nwinners," people selected from ",napplicants," applicants,\nwhere luck is ",100*f_luck,"% of the weighting"))
+
+    p2=plot(sort(rand(napplicants)),(1:napplicants)/napplicants,linetype=:steppre,label="skill",legend=:topleft)
+    plot!(p2,sort(rand(napplicants)),(1:napplicants)/napplicants,linetype=:steppre,label="luck")
+    xlabel!(p2,"Value")
+    ylabel!(p2,"CDF")
+    title!(p2,"Whole applicant pool")
+
+    p3=plot(p2,p,layout=(2,1))
+
+    return ([mean(selskill),mean(selluck)],selskill,selluck,p3)
 end
 
-println("mean skill: ",mean(selskill))
-println("mean luck: ",mean(selluck))
+## Numbers from video
 
-## Plots
-
-#ECDF plots of distrubutions of Skill and Luck values
-p=plot(sort(selskill),(1:length(selskill))/length(selskill),linetype=:steppre,label="skill",legend=:topleft)
-plot!(p,sort(selluck),(1:length(selluck))/length(selluck),linetype=:steppre,label="luck")
-xaxis!(p,(0,1))
-xlabel!(p,"Value")
-ylabel!(p,"CDF")
-title!(p,"11 astronauts selected from 18000 applicants")
-
-#=
-This way of plotting is equivalent to
-d=StatsBase.ecdf(selskill)
-plot(sort(a),d(sort(a)),linetype=:steppre)
-=#
-
-##
-
-p2=plot(sort(rand(napplicants)),(1:napplicants)/napplicants,linetype=:steppre,label="skill",legend=:topleft)
-plot!(p2,sort(rand(napplicants)),(1:napplicants)/napplicants,linetype=:steppre,label="luck")
-xlabel!(p2,"Value")
-ylabel!(p2,"CDF")
-title!(p2,"Whole applicant pool")
-
-##
-
-plot(p2,p,layout=(2,1))
+a=findluck(18000,11,.05)
+a[1]
+a[4]
