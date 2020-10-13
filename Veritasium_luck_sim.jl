@@ -48,3 +48,15 @@ end
 a=findluck(18000,11,.05)
 a[1]
 a[4]
+
+## sweep over luck weighting
+
+ws=[.05,.01,.005,.001,.0005,.0001]
+p=plot(legend=:topleft,linetype=:steppre,legendtitle="Weight (%)")
+for i=1:length(ws)
+    a=findluck(18000,11,ws[i])
+    plot!(p,sort(a[3]),(1:length(a[3]))/length(a[3]),label=string(ws[i]*100))
+end
+xlabel!("Luck Value")
+ylabel!("CDF")
+p
